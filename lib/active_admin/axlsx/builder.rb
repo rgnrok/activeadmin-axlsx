@@ -42,9 +42,10 @@ module ActiveAdmin
       #   @see ActiveAdmin::Axlsx::DSL
       def initialize(resource_class, options={}, &block)
         @skip_header = false
-        @columns = resource_columns(resource_class)
+        @columns = []
+        @resource_class = resource_class
         parse_options options
-        instance_eval &block if block_given?
+        @block = block if block_given?
       end
 
       # The default header style
@@ -129,6 +130,9 @@ module ActiveAdmin
       # Serializes the collection provided
       # @return [Axlsx::Package]
       def serialize(collection)
+        @columns = resource_columns(@resource_class)
+        instance_eval &@block if @block.present?
+
         @collection = collection
         apply_filter @before_filter
         export_collection(collection)
